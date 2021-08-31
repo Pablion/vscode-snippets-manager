@@ -1,3 +1,6 @@
+packages/code-snippets-editor/src
+yarn.lock
+
 .vscode/**
 .vscode-test/**
 out/test/**

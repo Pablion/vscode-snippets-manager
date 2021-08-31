@@ -37,7 +37,7 @@
         {
           "id": "snippetsmanager-snippetsView",
           "title": "Snippets",
-          "icon": "images/icon.svg"
+          "icon": "$(symbol-snippet)"
         }
       ]
     },
@@ -116,6 +116,17 @@
         "title": "Refresh",
         "icon": "$(refresh)",
         "category": "Snippets Manager"
+      }
+    ],
+    "customEditors": [
+      {
+        "viewType": "snippetsmanager.codeSnippetsEditorView",
+        "displayName": "Code Snippets",
+        "selector": [
+          {
+            "filenamePattern": "*.code-snippets"
+          }
+        ]
       }
     ]
   },
