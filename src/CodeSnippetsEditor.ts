@@ -106,8 +106,29 @@ export class CodeSnippetsEditor implements vscode.CustomTextEditorProvider {
     const scriptUri = webview.asWebviewUri(
       vscode.Uri.joinPath(
         this.context.extensionUri,
-        "media",
-        "codeSnippetsEditor.js"
+        // "media",
+        // "codeSnippetsEditor.js"
+        "packages",
+        "code-snippets-editor",
+        "dist",
+        "main.js"
+      )
+    );
+
+    const reactscriptUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this.context.extensionUri,
+        // "media",
+        // "codeSnippetsEditor.js"
+        "packages/code-snippets-editor/node_modules/react/umd/react.development.js"
+      )
+    );
+    const reactdomscriptUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this.context.extensionUri,
+        // "media",
+        // "codeSnippetsEditor.js"
+        "packages/code-snippets-editor/node_modules/react-dom/umd/react-dom.development.js"
       )
     );
 
@@ -151,12 +172,10 @@ export class CodeSnippetsEditor implements vscode.CustomTextEditorProvider {
 				<title>Code Snippets</title>
 			</head>
 			<body>
-				<div class="notes">
-					<div class="add-button">
-						<button>Scratch!</button>
-					</div>
-				</div>
+				<div id="root"></div>
 				
+				<script nonce="${nonce}" src="${reactscriptUri}"></script>
+				<script nonce="${nonce}" src="${reactdomscriptUri}"></script>
 				<script nonce="${nonce}" src="${scriptUri}"></script>
 			</body>
 			</html>`;

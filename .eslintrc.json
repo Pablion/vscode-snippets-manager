@@ -12,7 +12,8 @@
     "curly": "warn",
     "eqeqeq": "warn",
     "no-throw-literal": "warn",
-    "semi": "off"
+    "semi": "off",
+    "naming-convention": "off"
   },
   "ignorePatterns": ["out", "dist", "**/*.d.ts"]
 }
