@@ -2,9 +2,8 @@
   "compilerOptions": {
     "target": "ESNext",
     "jsx": "react-jsx",
-    "moduleResolution": "Node",
-    "allowSyntheticDefaultImports": true,
     "rootDir": "src",
+    "allowSyntheticDefaultImports": true,
     "strict": true
   },
   "exclude": ["node_modules"]
