@@ -1,13 +1,13 @@
 {
   "name": "snippetsmanager",
   "displayName": "Snippets Manager",
-  "description": "VSCode snippets manager.",
+  "description": "Create and edit snippets easily.",
   "keywords": [
-    "snippet",
+    "snippet editor",
+    "edit snippet",
+    "create snippet",
     "snippet manager",
-    "snippet create",
-    "snippets",
-    "snippets manager"
+    "snippets"
   ],
   "version": "0.0.3",
   "publisher": "zjffun",
