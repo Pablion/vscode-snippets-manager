@@ -1,27 +1,17 @@
 // Generated using webpack-cli https://github.com/webpack/webpack-cli
 
 const path = require("path");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 const isProduction = process.env.NODE_ENV === "production";
 
 const config = {
-  devtool: "inline-source-map",
   entry: "./src/index.tsx",
   output: {
     path: path.resolve(__dirname, "dist"),
+    clean: true,
   },
-  devServer: {
-    open: true,
-    host: "localhost",
-  },
-  plugins: [
-    new MiniCssExtractPlugin(),
-    new HtmlWebpackPlugin({
-      template: "index.html",
-    }),
-  ],
+  plugins: [new MiniCssExtractPlugin()],
   module: {
     rules: [
       {
@@ -45,10 +35,11 @@ const config = {
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
   },
-  externals: {
-    react: "React",
-    "react-dom": "ReactDOM",
-  },
+  // TODO: external
+  // externals: {
+  //   react: "React",
+  //   "react-dom": "ReactDOM",
+  // },
 };
 
 module.exports = () => {
@@ -56,6 +47,7 @@ module.exports = () => {
     config.mode = "production";
   } else {
     config.mode = "development";
+    config.devtool = "inline-source-map";
   }
   return config;
 };

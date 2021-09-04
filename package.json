@@ -139,9 +139,9 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "yarn run compile",
+    "vscode:prepublish": "cd packages/code-snippets-editor && npm pack && cd - && yarn add ./packages/code-snippets-editor/code-snippets-editor-0.0.1.tgz && yarn run compile",
     "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
+    "watch": "cd packages/code-snippets-editor && (yarn run watch &) && cd - && yarn add ./packages/code-snippets-editor && tsc -watch -p ./",
     "pretest": "yarn run compile && yarn run lint",
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js"
@@ -162,6 +162,7 @@
   },
   "dependencies": {
     "@vscode/codicons": "^0.0.21",
+    "code-snippets-editor": "./packages/code-snippets-editor",
     "vscode-ext-codicons": "^1.4.0",
     "vscode-ext-help-and-feedback-view": "^1.0.1"
   },

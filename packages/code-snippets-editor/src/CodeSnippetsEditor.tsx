@@ -10,7 +10,7 @@ declare global {
 
 const vscode = acquireVsCodeApi();
 
-function getSnippetEntries(text): SnippetEntries {
+function getSnippetEntries(text: string): SnippetEntries {
   try {
     return Object.entries(JSON.parse(text));
   } catch {

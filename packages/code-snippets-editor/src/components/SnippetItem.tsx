@@ -9,7 +9,7 @@ interface Props {
 }
 
 const CodeSnippetsEditor = ({ name, snippet, vscode }: Props) => {
-  const formRef = useRef();
+  const formRef = useRef<HTMLFormElement | null>(null);
   const [edit, setEdit] = useState(false);
 
   return (
@@ -110,6 +110,10 @@ const CodeSnippetsEditor = ({ name, snippet, vscode }: Props) => {
                 tabIndex={0}
                 role="button"
                 onClick={() => {
+                  if (!formRef.current) {
+                    return;
+                  }
+
                   const data = new FormData(formRef.current);
                   vscode.postMessage({
                     type: "update",

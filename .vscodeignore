@@ -1,4 +1,4 @@
-packages/code-snippets-editor/src
+packages
 yarn.lock
 
 .vscode/**
