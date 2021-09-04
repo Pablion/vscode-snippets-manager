@@ -85,6 +85,10 @@
         {
           "command": "_snippetsmanager.editSnippet",
           "when": "false"
+        },
+        {
+          "command": "_snippetsmanager.showSnippet",
+          "when": "false"
         }
       ],
       "editor/context": [
@@ -110,6 +114,10 @@
         "command": "_snippetsmanager.editSnippet",
         "title": "Edit Snippet",
         "icon": "$(edit)"
+      },
+      {
+        "command": "_snippetsmanager.showSnippet",
+        "title": "Show Snippet"
       },
       {
         "command": "snippetsmanager.refresh",
@@ -153,6 +161,7 @@
     "vscode-test": "^1.5.2"
   },
   "dependencies": {
+    "@vscode/codicons": "^0.0.21",
     "vscode-ext-codicons": "^1.4.0",
     "vscode-ext-help-and-feedback-view": "^1.0.1"
   },

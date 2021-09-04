@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { Snippet } from ".";
 import { getNonce } from "./util";
 
 /**
@@ -23,20 +24,7 @@ export class CodeSnippetsEditor implements vscode.CustomTextEditorProvider {
     return providerRegistration;
   }
 
-  private static readonly viewType = "snippetsmanager.codeSnippetsEditorView";
-
-  private static readonly scratchCharacters = [
-    "😸",
-    "😹",
-    "😺",
-    "😻",
-    "😼",
-    "😽",
-    "😾",
-    "🙀",
-    "😿",
-    "🐱",
-  ];
+  public static readonly viewType = "snippetsmanager.codeSnippetsEditorView";
 
   constructor(private readonly context: vscode.ExtensionContext) {}
 
@@ -83,14 +71,14 @@ export class CodeSnippetsEditor implements vscode.CustomTextEditorProvider {
     });
 
     // Receive message from the webview.
-    webviewPanel.webview.onDidReceiveMessage((e) => {
-      switch (e.type) {
-        case "add":
-          this.addNewScratch(document);
+    webviewPanel.webview.onDidReceiveMessage(({ type, payload }) => {
+      switch (type) {
+        case "update":
+          this.updateSnippet(document, payload);
           return;
 
         case "delete":
-          this.deleteScratch(document, e.id);
+          this.deleteSnippet(document, payload.key);
           return;
       }
     });
@@ -106,8 +94,6 @@ export class CodeSnippetsEditor implements vscode.CustomTextEditorProvider {
     const scriptUri = webview.asWebviewUri(
       vscode.Uri.joinPath(
         this.context.extensionUri,
-        // "media",
-        // "codeSnippetsEditor.js"
         "packages",
         "code-snippets-editor",
         "dist",
@@ -115,20 +101,36 @@ export class CodeSnippetsEditor implements vscode.CustomTextEditorProvider {
       )
     );
 
-    const reactscriptUri = webview.asWebviewUri(
+    const styleUri = webview.asWebviewUri(
       vscode.Uri.joinPath(
         this.context.extensionUri,
-        // "media",
-        // "codeSnippetsEditor.js"
+        "packages",
+        "code-snippets-editor",
+        "dist",
+        "main.css"
+      )
+    );
+
+    const reactScriptUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this.context.extensionUri,
         "packages/code-snippets-editor/node_modules/react/umd/react.development.js"
       )
     );
-    const reactdomscriptUri = webview.asWebviewUri(
+    const reactDomScriptUri = webview.asWebviewUri(
       vscode.Uri.joinPath(
         this.context.extensionUri,
-        // "media",
-        // "codeSnippetsEditor.js"
         "packages/code-snippets-editor/node_modules/react-dom/umd/react-dom.development.js"
+      )
+    );
+
+    const codiconsUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this.context.extensionUri,
+        "node_modules",
+        "@vscode/codicons",
+        "dist",
+        "codicon.css"
       )
     );
 
@@ -138,14 +140,6 @@ export class CodeSnippetsEditor implements vscode.CustomTextEditorProvider {
 
     const styleVSCodeUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this.context.extensionUri, "media", "vscode.css")
-    );
-
-    const styleMainUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(
-        this.context.extensionUri,
-        "media",
-        "codeSnippetsEditor.css"
-      )
     );
 
     // Use a nonce to whitelist which scripts can be run
@@ -161,21 +155,23 @@ export class CodeSnippetsEditor implements vscode.CustomTextEditorProvider {
 				Use a content security policy to only allow loading images from https or from our extension directory,
 				and only allow scripts that have a specific nonce.
 				-->
-				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource}; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
+				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource}; style-src ${webview.cspSource}; font-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
 
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+        
+				<link href="${codiconsUri}" rel="stylesheet" />
 				<link href="${styleResetUri}" rel="stylesheet" />
 				<link href="${styleVSCodeUri}" rel="stylesheet" />
-				<link href="${styleMainUri}" rel="stylesheet" />
+				<link href="${styleUri}" rel="stylesheet" />
 
 				<title>Code Snippets</title>
 			</head>
 			<body>
 				<div id="root"></div>
 				
-				<script nonce="${nonce}" src="${reactscriptUri}"></script>
-				<script nonce="${nonce}" src="${reactdomscriptUri}"></script>
+				<script nonce="${nonce}" src="${reactScriptUri}"></script>
+				<script nonce="${nonce}" src="${reactDomScriptUri}"></script>
 				<script nonce="${nonce}" src="${scriptUri}"></script>
 			</body>
 			</html>`;
@@ -184,49 +180,47 @@ export class CodeSnippetsEditor implements vscode.CustomTextEditorProvider {
   /**
    * Add a new scratch to the current document.
    */
-  private addNewScratch(document: vscode.TextDocument) {
-    const json = this.getDocumentAsJson(document);
-    const character =
-      CodeSnippetsEditor.scratchCharacters[
-        Math.floor(Math.random() * CodeSnippetsEditor.scratchCharacters.length)
-      ];
-    json.scratches = [
-      ...(Array.isArray(json.scratches) ? json.scratches : []),
-      {
-        id: getNonce(),
-        text: character,
-        created: Date.now(),
-      },
-    ];
+  private updateSnippet(document: vscode.TextDocument, payload: any) {
+    let snippetEntries = this.getDocumentAsSnippetEntries(document);
 
-    return this.updateTextDocument(document, json);
+    snippetEntries = snippetEntries.map(([key, snippet]) => {
+      if (key === payload.key) {
+        snippet.prefix = payload.data.prefix;
+        snippet.description = payload.data.description;
+        snippet.scope = payload.data.scope;
+        snippet.body = payload.data.body.split("\n");
+        return [payload.data.name, snippet];
+      }
+      return [key, snippet];
+    });
+
+    return this.updateTextDocument(document, snippetEntries);
   }
 
   /**
    * Delete an existing scratch from a document.
    */
-  private deleteScratch(document: vscode.TextDocument, id: string) {
-    const json = this.getDocumentAsJson(document);
-    if (!Array.isArray(json.scratches)) {
-      return;
-    }
+  private deleteSnippet(document: vscode.TextDocument, key: string) {
+    let snippetEntries = this.getDocumentAsSnippetEntries(document);
 
-    json.scratches = json.scratches.filter((note: any) => note.id !== id);
+    snippetEntries = snippetEntries.filter(([_key]) => _key !== key);
 
-    return this.updateTextDocument(document, json);
+    return this.updateTextDocument(document, snippetEntries);
   }
 
   /**
-   * Try to get a current document as json text.
+   * Try to get a current document as object entries.
    */
-  private getDocumentAsJson(document: vscode.TextDocument): any {
+  private getDocumentAsSnippetEntries(
+    document: vscode.TextDocument
+  ): [string, Snippet][] {
     const text = document.getText();
     if (text.trim().length === 0) {
-      return {};
+      return Object.entries({});
     }
 
     try {
-      return JSON.parse(text);
+      return Object.entries(JSON.parse(text));
     } catch {
       throw new Error(
         "Could not get document as json. Content is not valid json"
@@ -235,9 +229,12 @@ export class CodeSnippetsEditor implements vscode.CustomTextEditorProvider {
   }
 
   /**
-   * Write out the json to a given document.
+   * Write out the snippet entries to a given document.
    */
-  private updateTextDocument(document: vscode.TextDocument, json: any) {
+  private updateTextDocument(
+    document: vscode.TextDocument,
+    snippetEntries: any
+  ) {
     const edit = new vscode.WorkspaceEdit();
 
     // Just replace the entire document every time for this example extension.
@@ -245,7 +242,7 @@ export class CodeSnippetsEditor implements vscode.CustomTextEditorProvider {
     edit.replace(
       document.uri,
       new vscode.Range(0, 0, document.lineCount, 0),
-      JSON.stringify(json, null, 2)
+      JSON.stringify(Object.fromEntries(snippetEntries), null, 2)
     );
 
     return vscode.workspace.applyEdit(edit);

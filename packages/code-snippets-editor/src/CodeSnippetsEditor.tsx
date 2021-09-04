@@ -1,33 +1,29 @@
 import React, { useEffect, useState } from "react";
+import SnippetItem from "./components/SnippetItem";
+import { SnippetEntries } from "./typings";
+
+import "./CodeSnippetsEditor.scss";
+
+declare global {
+  const acquireVsCodeApi: any;
+}
 
 const vscode = acquireVsCodeApi();
 
-function handleAddClick() {
-  vscode.postMessage({
-    type: "add",
-  });
-}
-
-function getState(text) {
-  let json;
+function getSnippetEntries(text): SnippetEntries {
   try {
-    if (!text) {
-      text = "{}";
-    }
-    json = JSON.parse(text);
+    return Object.entries(JSON.parse(text));
   } catch {
-    return {};
+    return Object.entries({});
   }
-  return json;
 }
 
 const CodeSnippetsEditor = () => {
-  debugger;
   // Webviews are normally torn down when not visible and re-created when they become visible again.
   // State lets us save information across these re-loads
-  const [state, setState] = useState(getState(vscode.getState()));
-  // useEffect(() => vscode.)
-  console.log(state);
+  const [snippetEntries, setSnippetEntries] = useState<SnippetEntries>(
+    getSnippetEntries(vscode.getState()?.text)
+  );
 
   useEffect(() => {
     // Handle messages sent from the extension to the webview
@@ -36,23 +32,32 @@ const CodeSnippetsEditor = () => {
       switch (message.type) {
         case "update":
           const text = message.text;
-          setState(getState(text));
+          setSnippetEntries(getSnippetEntries(text));
 
           // Then persist state information.
           // This state is returned in the call to `vscode.getState` below when a webview is reloaded.
           vscode.setState({ text });
-
           return;
       }
     });
   }, []);
 
   return (
-    <div className="App">
-      {Object.entries(state).map((state) => {
-        return state[0];
-      })}
-    </div>
+    <main className="code-snippets-editor">
+      <ul className="code-snippets-editor-snippets">
+        {snippetEntries.map(([key, snippet]) => {
+          return (
+            <li className="code-snippets-editor-snippets__item" key={key}>
+              <SnippetItem
+                name={key}
+                snippet={snippet}
+                vscode={vscode}
+              ></SnippetItem>
+            </li>
+          );
+        })}
+      </ul>
+    </main>
   );
 };
 

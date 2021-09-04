@@ -3,7 +3,9 @@
     "target": "ESNext",
     "jsx": "react-jsx",
     "moduleResolution": "Node",
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "rootDir": "src",
+    "strict": true
   },
   "exclude": ["node_modules"],
   "include": ["typings.d.ts"]

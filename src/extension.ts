@@ -5,6 +5,7 @@ import editSnippet from "./editSnippet";
 import { CodeSnippetsEditor } from "./CodeSnippetsEditor";
 import { refresh, registerExplorerView } from "./explorerView";
 import { registerHelpAndFeedbackView } from "./helpAndFeedbackView";
+import showSnippet from "./showSnippet";
 
 export function activate(context: vscode.ExtensionContext) {
   registerExplorerView(context);
@@ -29,6 +30,15 @@ export function activate(context: vscode.ExtensionContext) {
       "_snippetsmanager.editSnippet",
       (snippet) => {
         editSnippet(snippet);
+      }
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "_snippetsmanager.showSnippet",
+      (snippet) => {
+        showSnippet(snippet);
       }
     )
   );
